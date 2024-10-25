@@ -745,10 +745,28 @@ elif st.session_state.page == 'next_page':
             print("이 질문은" + which_csv)
 
             with st.spinner("Thinking..."):
-                # (Step 2) 1번 질문일 경우 (검색형 질문)
-                if int(which_csv) == 1:
-                    # (2-1) sql 쿼리 반환 [두번째 gemini 호출]
-                    sql_query = convert_question_to_sql(prompt)
+                # (Step 2) 2번 질문일 경우 (추천형 질문)
+                if int(which_csv[0]) == 2:
+                    # (2-1) 고정질문 (방문지역, 방문목적) 기준으로 필터링
+                    fixed_filtered = filter_fixed_address_purpose(st.session_state.selected_regions, st.session_state.visit_purpose, text2_df)
+
+                    # (2-2) 고정질문 (날짜, 시간, 인원수) 기준으로 사용자 질문 수정
+                    print(f'날짜,시간,인원수: {st.session_state.selected_date}, {st.session_state.time_slot}, {st.session_state.members_num}')
+                    prompt = filter_fixed_datetime_members(st.session_state.selected_date, st.session_state.time_slot, st.session_state.members_num, prompt)
+
+                    # (2-3) FAISS 검색을 통해 유사도가 높은 15가지 레스토랑 추출
+                    top_15 = text2faiss(prompt, fixed_filtered) 
+                    print(f'faiss 추출 개수: {len(top_15)}')
+                    print(f'faiss 추천된 데이터 : {top_15["restaurant_name"]}')
+
+                    # (2-4) gemini 호출을 통해 추출된 15개의 레스토랑 중 추천 [두번째 gemini 호출]
+                    response = recommend_restaurant_from_subset(prompt, top_15)
+                    print(response)
+
+                # (Step 3) 1번 질문일 경우 (검색형 질문)
+                else: 
+                    # (3-1) sql 쿼리 반환 [두번째 gemini 호출]
+                    sql_query = convert_question_to_sql(which_csv)
                     print(f"Generated SQL Query: {sql_query}")
                     # (2-2) sql 쿼리 적용 및 결과 반환
                     sql_results = execute_sql_query_on_df(sql_query, df)
@@ -765,28 +783,7 @@ elif st.session_state.page == 'next_page':
                         response = generate_gemini_response_from_results(sql_results, prompt)
                         print(response)
 
-                # (Step 3) 2번 질문일 경우 (추천형 질문)
-                elif int(which_csv) == 2:
-                    # (3-1) 고정질문 (방문지역, 방문목적) 기준으로 필터링
-                    fixed_filtered = filter_fixed_address_purpose(st.session_state.selected_regions, st.session_state.visit_purpose, text2_df)
-
-                    # (3-2) 고정질문 (날짜, 시간, 인원수) 기준으로 사용자 질문 수정
-                    print(f'날짜,시간,인원수: {st.session_state.selected_date}, {st.session_state.time_slot}, {st.session_state.members_num}')
-                    prompt = filter_fixed_datetime_members(st.session_state.selected_date, st.session_state.time_slot, st.session_state.members_num, prompt)
-
-                    # (3-3) FAISS 검색을 통해 유사도가 높은 15가지 레스토랑 추출
-                    top_15 = text2faiss(prompt, fixed_filtered) 
-                    print(f'faiss 추출 개수: {len(top_15)}')
-                    print(f'faiss 추천된 데이터 : {top_15["restaurant_name"]}')
-
-                    # (3-4) gemini 호출을 통해 추출된 15개의 레스토랑 중 추천 [두번째 gemini 호출]
-                    response = recommend_restaurant_from_subset(prompt, top_15)
-                    print(response)
-                
-                else: 
-                    response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
-                    print("Error in classifying question type")
-
+            
                 placeholder = st.empty()
                 full_response = ''
                 

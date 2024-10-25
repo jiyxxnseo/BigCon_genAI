@@ -42,7 +42,7 @@ def text2faiss(user_input, df):
 
 def recommend_restaurant_from_subset(user_input, top_15_restaurants):
     """
-    FAISS 검색으로 반환된 15개 레스토랑을 통해 gemini를 호출해 추천을 진행하는 함수
+    FAISS 검색으로 반환된 15개 레스토랑을 통해 gemini를 호출해 추천을 진행하는 함수. 에러가 나거나 결과가 없을 시 기본메세지 반환.
 
     [Parameters]:
     user_input - 사용자가 입력한 질문
@@ -69,8 +69,22 @@ def recommend_restaurant_from_subset(user_input, top_15_restaurants):
     print("user_input_tokens: ", model.count_tokens(user_input))
     print("total_tokens: ", model.count_tokens(messages))
 
-    # Gemini 1.5 Flash로 응답 생성
-    response = model.generate_content(messages)
-    response = response.text.strip()
+    try:
+        # Gemini 1.5 Flash로 응답 생성
+        response = model.generate_content(messages)
+        # response = response.text.strip()
+        if hasattr(response, 'candidates') and response.candidates:
+            for candidate in response.candidates:
+                for part in candidate.content.parts:
+                    if hasattr(part, 'text'):
+                        response = part.text
+        else:
+            # 응답이 없을 경우 기본 메시지 설정
+            response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
+
+    except Exception as e:
+        # 에러 발생 시 기본 메세지 반환
+        print(f"Error occurred: {e}")
+        response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
 
     return response

@@ -24,18 +24,24 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
     for idx, row in filtered_df.iterrows():
         reference_info += f"{row['text']}\n"
 
-
-
     prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하게 식당 추천해주는 챗봇처럼:"
     
-    response = model.generate_content(prompt)
+    try:
+        response = model.generate_content(prompt)
 
-    # Print the response text in the terminal
-    if response._result and response._result.candidates:
-        generated_text = response._result.candidates[0].content.parts[0].text
-        #print(generated_text)  # Print the actual response
-    else:
-        print("No valid response generated.")
+        # Print the response text in the terminal
+        if response._result and response._result.candidates:
+            generated_text = response._result.candidates[0].content.parts[0].text
+            #print(generated_text)  # Print the actual response
+        else:
+            # 응답이 없는 경우 기본 메세지 설정
+            generated_text = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
+            print("No valid response generated.")
+    except Exception as e:
+        # 에러가 발생하면 기본 메시지 반환
+        print(f"Error occurred: {e}")
+        generated_text = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
+
     
     return generated_text
 
@@ -43,21 +49,21 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
 # Function to generate response based on SQL query results
 def generate_gemini_response_from_results(sql_results, question):
     """
-    SQL 쿼리를 통해 반환된 데이터에서 4개를 선택 후 gemini를 호출해 추천을 진행하는 함수
+    SQL 쿼리를 통해 반환된 데이터에서 4개를 선택 후 gemini를 호출해 추천을 진행하는 함수. 에러가 나거나 결과가 없을 시 기본메세지 반환.
 
     [Parameters]:
-    sql_results - SQL 쿼리를 통해 반환된 데이터
-    question - 사용자가 입력한 질문
+    - sql_results (df) : SQL 쿼리를 통해 반환된 데이터
+    - question (str) : 사용자가 입력한 질문
 
     [Returns]:
-    response - Gemini의 응답 텍스트
+    response (str) : Gemini의 응답 텍스트
     """
     if sql_results.empty:
         return  "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
 
-    # 데이터에서 상위 4개를 추출 (가장 첫 행이 Best Match라고 가정)
-    best_match = sql_results.iloc[:4]
-
+    # 데이터에서 상위 3개를 추출 (가장 첫 행이 Best Match라고 가정)
+    best_match = sql_results.iloc[:3]
+    print(best_match)
     reference_info = ""
     for idx, row in best_match.iterrows():
         reference_info += f"{row['text']}\n"
@@ -66,11 +72,21 @@ def generate_gemini_response_from_results(sql_results, question):
     print("input_tokens: ", model.count_tokens(prompt))
     print("sql_참고자료 tokens: ", model.count_tokens(reference_info))
 
-    # Generate response using Gemini model
-    response = model.generate_content(prompt)
-    if hasattr(response, 'candidates') and response.candidates:
-        for candidate in response.candidates:
-            for part in candidate.content.parts:
-                if hasattr(part, 'text'):
-                    response=part.text
+    try:
+        # Generate response using Gemini model
+        response = model.generate_content(prompt)
+        if hasattr(response, 'candidates') and response.candidates:
+            for candidate in response.candidates:
+                for part in candidate.content.parts:
+                    if hasattr(part, 'text'):
+                        response=part.text
+        else:
+            # 응답이 없을 경우 기본 메세지 설정
+            response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
+    
+    except Exception as e:
+        # 에러 발생 시 기본 메세지 반환
+        print(f"Error occurred: {e}")
+        response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
+
     return response

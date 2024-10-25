@@ -1,12 +1,11 @@
 import sys
 import os
-
 # bigcontest_genAI 디렉토리를 Python 모듈 경로에 추가
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
-
 from utils.config import config  # config.yaml에서 경로와 설정을 가져옴
 import pandas as pd
 import re
+
 def filter_fixed_address_purpose(input_address, purpose_choice, data):
     """
     방문 지역과 방문 목적에 따라 레스토랑을 필터링하고 반환하는 함수.
@@ -92,7 +91,7 @@ if __name__ == "__main__":
     output_filename = 'map_purpose_filtered_example.csv'  # 결과를 저장할 파일 이름
 
     # 레스토랑 필터링 및 추천
-    filtered_recommendations = filter_and_recommend_restaurants(input_address, purpose_choice, categorized_data_file, output_filename)
+    filtered_recommendations = filter_fixed_address_purpose(input_address, purpose_choice, categorized_data_file, output_filename)
 
     if filtered_recommendations is not None:
         print(f"Recommended restaurants saved to {output_filename}")
