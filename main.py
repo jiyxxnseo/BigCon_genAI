@@ -15,10 +15,10 @@ from datetime import datetime
 from utils.config import model, df, text2_df, config 
 from utils.sql_utils import convert_question_to_sql, execute_sql_query_on_df
 from utils.faiss_utils import load_faiss_index, embed_text
-from utils.emotion_detector import detect_emotion_and_context
-from utils.response_generator import generate_response_with_faiss, generate_gemini_response_from_results
-from utils.text2 import text2faiss, recommend_restaurant_from_subset
-from utils.address_purpose import filter_and_recommend_restaurants
+from utils.user_input_detector import detect_emotion_and_context
+from utils.text1_response_generator import generate_response_with_faiss, generate_gemini_response_from_results
+from utils.text2_response_generator import text2faiss, recommend_restaurant_from_subset
+from utils.filter_fixed_inputs import filter_and_recommend_restaurants
 
 
 # 세션 상태에서 페이지 상태를 관리
@@ -32,7 +32,6 @@ if 'chat_history' not in st.session_state:
 # 페이지 이동 함수
 def go_to_next_page():
     st.session_state.page = 'next_page'
-
 # 메인 페이지
 if st.session_state.page == 'main':
     
@@ -322,8 +321,10 @@ if st.session_state.page == 'main':
             justify-content: center;
             align-items: center;
             margin: 0 auto;
+            padding-right: 80px;
             overflow-x: auto;
             white-space: nowrap;
+            font-size: 0.9em;
             
             position: relative;
             top: 52px;
@@ -373,16 +374,17 @@ if st.session_state.page == 'main':
         st.markdown("<div class='custom-label'>날짜를 선택해주세요.</div>", unsafe_allow_html=True)
         date_option = st.selectbox("", ["선택 안함", "날짜 선택"])
 
-        # 선택한 옵션에 따라 date_input 표시
+        # 선택한 옵션에 따라 이를 요일로 변환해 selected_date에 저장
         if date_option == "날짜 선택":
             weekdays = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일']
             selected_date = st.date_input("")
             selected_date = weekdays[selected_date.weekday()]
+        # 선택안함 시 빈칸으로 저장
         else:
             selected_date = ""
         st.session_state.selected_date = selected_date
 
-        
+    # 시간대 선택 및 저장, 선택 안함 시 빈칸
     with col2:
         st.markdown("<div class='custom-label'>시간대를 선택해주세요.</div>", unsafe_allow_html=True)
         time_slot = st.selectbox(
@@ -393,6 +395,7 @@ if st.session_state.page == 'main':
             time_slot = ""
         st.session_state.time_slot = time_slot
 
+    # 인원수 선택 및 저장, 선택 안함 시 빈칸
     with col3:
         st.markdown("<div class='custom-label'>인원수를 선택해주세요.</div>", unsafe_allow_html=True)
         members_num = st.selectbox(
@@ -415,7 +418,7 @@ if st.session_state.page == 'main':
     )
 
 
-    # 중앙에 selectbox를 배치
+    # 방문목적 선택 및 저장, 선택 안함 시 빈칸 : 중앙에 selectbox를 배치
     col_center = st.columns([1, 1, 1])
     with col_center[1]:
         visit_purpose = st.selectbox(
@@ -573,34 +576,26 @@ if st.session_state.page == 'main':
     st.markdown(
         """
         <div class="box_chatshape">
-            감사합니다! 이제&nbsp<span class="text-bold">제주의 멋진 곳</span>을 추천해드리겠습니다☺️&nbsp&nbsp&nbsp&nbsp&nbsp
+            감사합니다! 이제&nbsp<span class="text-bold">제주의 멋진 곳</span>을 추천해드리겠습니다☺️ 오른쪽 버튼을 두 번 눌러주세요&nbsp→
         </div>
         """,
         unsafe_allow_html=True
     )
     
-    # user_firstInput = st.text_input("", placeholder="여기에 입력하세요", key="user_input")
-    
-    # st.markdown(
-    #     f"""
-    #     <input class="custom-input" type="text" placeholder="여기에 입력하세요" value="{user_firstInput}">
-    #     """,
-    #     unsafe_allow_html=True
-    # )
-    
     if st.button("채팅 시작"):
         go_to_next_page()
         
     st.markdown('<div class="spacing-50px"></div>', unsafe_allow_html=True)
-        
-####### 두 번째 페이지 #######
-####### 두 번째 페이지 #######
-# 변수 : st.session.selected_date, time_slot, members_num, visit_purpose, selected_regions(리스트) 
-# time_slot : "선택 안함", "아침", "점심", "오후", "저녁", "밤"
-# members_num : "선택 안함", "혼자", "2명", "3명", "4명 이상"
-# visit_purpose : "선택안함", "식사" "카페/디저트"
-# prompt : 사용자 input
 
+
+
+####### 두 번째 페이지 #######
+
+# 변수 : selected_date, time_slot, members_num, visit_purpose, selected_regions(리스트) 
+# -time_slot : "선택 안함", "아침", "점심", "오후", "저녁", "밤"
+# -members_num : "선택 안함", "혼자", "2명", "3명", "4명 이상"
+# -visit_purpose : "선택안함", "식사" "카페/디저트"
+# -prompt : 사용자 input
 
 
 elif st.session_state.page == 'next_page':
@@ -692,6 +687,7 @@ elif st.session_state.page == 'next_page':
         }
         textarea[data-testid="stChatInputTextArea"]{
             color: #000000;
+            caret-color: #000000;
         }
         div [data-testid="stChatInput"] {
             background-color: #ffefcc;
@@ -699,6 +695,28 @@ elif st.session_state.page == 'next_page':
         div [data-testid="stBottomBlockContainer"] {
             padding: 1rem 1rem 30px;
         }
+        
+        /* 뒤로가기 버튼 */
+        button[kind="secondary"] {
+            background-color: #feefcc !important;
+            color: #f7a660;
+            border: none;
+            border-radius: 20px;
+            height: 35px;
+            min-height: 10px;
+        }
+        button[kind="secondary"]:hover {
+            color: #ee8124;
+        }
+        div [data-testid="stButton"] {
+            position: fixed;
+            top: 80px;
+            left: 10px;
+            margin: 10px;
+            padding-right: 70px;
+            z-index: 1000;
+        }
+        
         
         </style>
         """,
@@ -728,16 +746,19 @@ elif st.session_state.page == 'next_page':
     # 사용자가 새로운 메시지를 입력한 후 응답 생성
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant", avatar=assistant_avatar):
+            # (1) 1번, 2번 중 어느 질문인지 반환 [첫번째 gemini 호출]
             which_csv = detect_emotion_and_context(prompt)
             print("이 질문은" + which_csv)
 
             with st.spinner("Thinking..."):
+                # (2) 1번 질문일 경우 (검색형 질문)
                 if int(which_csv) == 1:
+                    # (2-1) sql 쿼리 반환 [두번째 gemini 호출]
                     sql_query = convert_question_to_sql(prompt)
                     print(f"Generated SQL Query: {sql_query}")
-
+                    # (2-2) sql 쿼리 적용 및 결과 반환
                     sql_results = execute_sql_query_on_df(sql_query, df)
-
+                    # (2-3) 반환된 데이터가 없을 시 faiss 적용 [세번째 gemini 호출]
                     if sql_results.empty:
                         print("SQL query failed or returned no results. Falling back to FAISS.")
 
@@ -749,9 +770,10 @@ elif st.session_state.page == 'next_page':
                     else:
                         response = generate_gemini_response_from_results(sql_results, prompt)
                         print(response)
-            
+
+                # (3) 2번 질문일 경우 (추천형 질문)
                 elif int(which_csv) == 2:
-                    #index_path = config['faiss']['text2_faiss_index']
+                    #
                     embeddings_path = config['faiss']['text2_embeddings']
                     # 고정질문 (지역, 방문목적) 필터링
                     fixed_filtered = filter_and_recommend_restaurants(st.session_state.selected_regions, st.session_state.visit_purpose,text2_df)
