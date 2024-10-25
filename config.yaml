@@ -1,0 +1,22 @@
+# Configuration settings for the application
+
+google_api:
+  api_key: "AIzaSyAh7WkRGw7ZeVNkP312KCfR3tT6ApjG6XM"  # Replace with your actual Google API key
+
+device: "cuda"  # or "cpu", depending on your setup
+
+data:
+  # Paths to your data files
+  categorized_data: "data/categorized_restaurants.csv"
+  restaurant_data_csv: "data/update_final_shinhancard_data_with_text.csv"
+  restaurant_info_data_csv: "data/updated_final_kakao_restaurant_with_address_map_text2.csv"
+
+faiss:
+  embeddings_path: "modules/updated_text1_restaurant_embeddings.npy"
+  faiss_index: "modules/updated_text1_restaurant_faiss.index"
+  text2_faiss_index: "modules/updated_text2_kakao_restaurant_faiss.index"
+  text2_embeddings: "modules/updated_text2_kakao_restaurant_embeddings.npy"
+
+model:
+  name: "gemini-1.5-flash"
+  embedding_model_name: "jhgan/ko-sroberta-multitask"  # Example embedding model
