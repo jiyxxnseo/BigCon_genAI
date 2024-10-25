@@ -2,28 +2,25 @@ import torch
 import faiss
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
-from utils.config import model, tokenizer, embedding_model, device
+from utils.config import model, tokenizer, embedding_model, device, config
 
-def text2faiss(user_input, embeddings_path, df):
+def text2faiss(user_input, df):
     """
-
     [Parameters]:
     user_input - 사용자가 입력한 input
-    embeddings_path -
     df - 고정질문을 통해 필터링된 데이터프레임
 
     [Returns]:
-    top_300_restaurants : 사용자 입력과 유사한 상위 300개의 레스토랑 반환
-
+    top_300_restaurants - 사용자 입력과 유사한 상위 300개의 레스토랑 반환
     """
-
     # FAISS 임베딩 불러오기
-    #faiss_index = faiss.read_index(faiss_index_path)
+    embeddings_path = config['faiss']['text2_embeddings']
     embeddings = np.load(embeddings_path)
 
     # 필터링된 데이터의 인덱스 추출
     filtered_indices = df.index.tolist()
-    # 필터링된 임베딩 추출
+
+    # 추출된 인덱스를 통해 임베딩 데이터에서 필터링된 데이터만 추출
     filtered_embeddings = embeddings[filtered_indices]
     
     # FAISS 인덱스 빌드
@@ -43,29 +40,37 @@ def text2faiss(user_input, embeddings_path, df):
     
     return top_15_restaurants
 
-def recommend_restaurant_from_subset(user_input, top_300_restaurants):
-    # 전체 식당 설명을 한 번에 생성 (레스토랑 이름과 요약 정보를 사용)
+def recommend_restaurant_from_subset(user_input, top_15_restaurants):
+    """
+    FAISS 검색으로 반환된 15개 레스토랑을 통해 gemini를 호출해 추천을 진행하는 함수
+
+    [Parameters]:
+    user_input - 사용자가 입력한 질문
+    top_15_restaurants - FAISS를 통해 추출된 15개의 레스토랑 DataFrame
+    
+    [Returns]:
+    response - Gemini의 응답 텍스트
+    """
+    # 전체 식당 설명을 한 번에 생성 (레스토랑 이름과 요약 정보, 영업시간을 사용)
     all_descriptions = "\n\n".join(
         [
             f"{restaurant['restaurant_name']}/ {restaurant['text2']} (영업 시간: {restaurant['business_hours']})"
-            for idx, restaurant in top_300_restaurants.iterrows()
+            for idx, restaurant in top_15_restaurants.iterrows()
         ]
     )
-
-    # Gemini 모델을 위한 메시지 구성
     print(f"description 길이: {len(all_descriptions)}")
-    #messages = f"너는 사용자의 취향과 감정을 기반으로 제주도 맛집을 추천하는 챗봇이야. 사용자에게 맞는 식당을 대화하는 방식으로 추천해줘.{all_descriptions}는 식당 이름과 해당 식당에 대한 정보가 들어있는 데이터프래임이야. 사용자가 '{user_input}'라고 말했을 때 이 데이터프래임을 참고해서, 여기 있는 식당들을 다 둘러보고, 그 중에서 어떤 식당을 추천할지 3개를 골라주고, 그 이유를 설명해줘. 추천 식당은 최대한 겹치지 않게 해줘. 추천할만한 식당이 없다고 생각해도 꼭 하나는 추천해줘야해."
+
+    # Gemini 모델을 위한 프롬프트 구성
     messages = f"너는 사용자의 취향과 감정을 기반으로 제주도 맛집을 추천하는 챗봇이야. {all_descriptions}는 각 식당의 이름과 정보를 포함한 데이터프레임이야. 사용자가 '{user_input}'이라고 요청했을 때, 이 데이터프레임에 있는 식당들만 검토하고, 그 중에서 추천할 식당 3곳을 골라줘. 각 식당을 추천하는 이유도 설명해줘. 추천 식당은 서로 겹치지 않도록 해줘."
 
     print(f'messages = {messages}')
     print(user_input)
-    print(len(all_descriptions))
     print("all_descriptions", model.count_tokens(all_descriptions))
     print("user_input_tokens: ", model.count_tokens(user_input))
     print("total_tokens: ", model.count_tokens(messages))
 
     # Gemini 1.5 Flash로 응답 생성
     response = model.generate_content(messages)
-    response_text = response.text.strip()
+    response = response.text.strip()
 
-    return response_text
+    return response

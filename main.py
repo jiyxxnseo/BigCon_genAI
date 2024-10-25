@@ -1,15 +1,9 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-import json
 import requests
-import google.generativeai as genai
-
-
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
-import os
-from datetime import datetime
+
 
 # utils 가져오기 
 from utils.config import model, df, text2_df, config 
@@ -18,7 +12,7 @@ from utils.faiss_utils import load_faiss_index, embed_text
 from utils.user_input_detector import detect_emotion_and_context
 from utils.text1_response_generator import generate_response_with_faiss, generate_gemini_response_from_results
 from utils.text2_response_generator import text2faiss, recommend_restaurant_from_subset
-from utils.filter_fixed_inputs import filter_and_recommend_restaurants
+from utils.filter_fixed_inputs import filter_fixed_address_purpose, filter_fixed_datetime_members
 
 
 # 세션 상태에서 페이지 상태를 관리
@@ -746,19 +740,19 @@ elif st.session_state.page == 'next_page':
     # 사용자가 새로운 메시지를 입력한 후 응답 생성
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant", avatar=assistant_avatar):
-            # (1) 1번, 2번 중 어느 질문인지 반환 [첫번째 gemini 호출]
+            # (Step 1) 1번, 2번 중 어느 질문인지 반환 [첫번째 gemini 호출]
             which_csv = detect_emotion_and_context(prompt)
             print("이 질문은" + which_csv)
 
             with st.spinner("Thinking..."):
-                # (2) 1번 질문일 경우 (검색형 질문)
+                # (Step 2) 1번 질문일 경우 (검색형 질문)
                 if int(which_csv) == 1:
                     # (2-1) sql 쿼리 반환 [두번째 gemini 호출]
                     sql_query = convert_question_to_sql(prompt)
                     print(f"Generated SQL Query: {sql_query}")
                     # (2-2) sql 쿼리 적용 및 결과 반환
                     sql_results = execute_sql_query_on_df(sql_query, df)
-                    # (2-3) 반환된 데이터가 없을 시 faiss 적용 [세번째 gemini 호출]
+                    # (2-3) 반환된 데이터가 없을 시 faiss 적용, 있다면 그대로 gimini 호출 [세번째 gemini 호출]
                     if sql_results.empty:
                         print("SQL query failed or returned no results. Falling back to FAISS.")
 
@@ -771,29 +765,26 @@ elif st.session_state.page == 'next_page':
                         response = generate_gemini_response_from_results(sql_results, prompt)
                         print(response)
 
-                # (3) 2번 질문일 경우 (추천형 질문)
+                # (Step 3) 2번 질문일 경우 (추천형 질문)
                 elif int(which_csv) == 2:
-                    #
-                    embeddings_path = config['faiss']['text2_embeddings']
-                    # 고정질문 (지역, 방문목적) 필터링
-                    fixed_filtered = filter_and_recommend_restaurants(st.session_state.selected_regions, st.session_state.visit_purpose,text2_df)
+                    # (3-1) 고정질문 (방문지역, 방문목적) 기준으로 필터링
+                    fixed_filtered = filter_fixed_address_purpose(st.session_state.selected_regions, st.session_state.visit_purpose, text2_df)
 
+                    # (3-2) 고정질문 (날짜, 시간, 인원수) 기준으로 사용자 질문 수정
                     print(f'날짜,시간,인원수: {st.session_state.selected_date}, {st.session_state.time_slot}, {st.session_state.members_num}')
-                    # 날짜, 시간, 인원수 필터링
-                    if st.session_state.members_num == "4명 이상":
-                        prompt = prompt + f"{st.session_state.selected_date} {st.session_state.time_slot}. 예약 가능"
-                    elif st.session_state.members_num == "혼자": 
-                        prompt = prompt + f"{st.session_state.selected_date} {st.session_state.time_slot}. 혼자"
-                    else:
-                        prompt = prompt + f"{st.session_state.selected_date} {st.session_state.time_slot}"
-                    top_15 = text2faiss(prompt, embeddings_path, fixed_filtered) 
+                    prompt = filter_fixed_datetime_members(st.session_state.selected_date, st.session_state.time_slot, st.session_state.members_num, prompt)
 
+                    # (3-3) FAISS 검색을 통해 유사도가 높은 15가지 레스토랑 추출
+                    top_15 = text2faiss(prompt, fixed_filtered) 
                     print(f'faiss 추출 개수: {len(top_15)}')
                     print(f'faiss 추천된 데이터 : {top_15["restaurant_name"]}')
+
+                    # (3-4) gemini 호출을 통해 추출된 15개의 레스토랑 중 추천 [두번째 gemini 호출]
                     response = recommend_restaurant_from_subset(prompt, top_15)
                     print(response)
                 
                 else: 
+                    response = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
                     print("Error in classifying question type")
 
                 placeholder = st.empty()
