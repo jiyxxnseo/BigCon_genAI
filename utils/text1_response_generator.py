@@ -26,6 +26,7 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
 
     prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하게 식당 추천해주는 챗봇처럼:"
     
+    print(model.count_tokens(prompt))
     try:
         response = model.generate_content(prompt)
 
