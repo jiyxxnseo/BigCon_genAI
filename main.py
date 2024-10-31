@@ -721,6 +721,7 @@ elif st.session_state.page == 'next_page':
     if "messages" not in st.session_state.keys():
         st.session_state.messages = [{"role": "assistant", "content": "오늘의 기분이나 상황을 입력해주세요. 그에 맞는 제주의 멋진 곳을 추천해드립니다."}]
     
+    
     # 채팅 화면 초기화 함수
     def clear_chat_history():
         st.session_state.messages = [{"role": "assistant", "content": "오늘의 기분이나 상황을 입력해주세요. 그에 맞는 제주의 멋진 곳을 추천해드립니다."}]
@@ -730,6 +731,7 @@ elif st.session_state.page == 'next_page':
         avatar = user_avatar if message["role"] == "user" else assistant_avatar
         with st.chat_message(message["role"], avatar=avatar):
             st.write(message["content"])
+
  
     if prompt := st.chat_input():
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -770,7 +772,7 @@ elif st.session_state.page == 'next_page':
                     print(f"Generated SQL Query: {sql_query}")
                     # (2-2) sql 쿼리 적용 및 결과 반환
                     sql_results = execute_sql_query_on_df(sql_query, df)
-                    # (2-3) 반환된 데이터가 없을 시 faiss 적용, 있다면 그대로 gimini 호출 [세번째 gemini 호출]
+                    # (2-3) 반환된 데이터가 없을 시 faiss 적용, 있다면 그대로 gemini 호출 [세번째 gemini 호출]
                     if sql_results.empty:
                         print("SQL query failed or returned no results. Falling back to FAISS.")
 
