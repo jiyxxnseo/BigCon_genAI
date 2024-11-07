@@ -91,6 +91,6 @@ def recommend_restaurant_from_subset(user_input, top_15_restaurants):
     except Exception as e:
         # 에러 발생 시 기본 메세지 반환
         print(f"Error occurred: {e}")
-        response = "추천에 필요한 정보가 부족해요. 다시 구체적으로 질문해주세요!"    
-        
-        return response
+        response = "추천에 필요한 정보가 부족해요. 다시 구체적으로 질문해주세요!"
+
+    return response
