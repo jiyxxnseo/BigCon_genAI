@@ -798,9 +798,16 @@ elif st.session_state.page == 'next_page':
                 placeholder.markdown(full_response)
         message = {"role": "assistant", "content": full_response}
         st.session_state.messages.append(message)
+        
 
+    # 뒤로가기 버튼 클릭 시 초기화 함수
     def go_to_previous():
+        # 메인 페이지로 이동
         st.session_state.page = 'main'
         
+        # 대화 기록 초기화
+        clear_chat_history()
+
+    # 뒤로가기 버튼 생성
     if st.button("⇦ 뒤로"):
         go_to_previous()

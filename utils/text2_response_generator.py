@@ -94,5 +94,3 @@ def recommend_restaurant_from_subset(user_input, top_15_restaurants):
         response = "추천에 필요한 정보가 부족해요. 다시 구체적으로 질문해주세요!"
 
     return response
-
-
