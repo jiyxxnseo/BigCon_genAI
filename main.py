@@ -12,7 +12,7 @@ from utils.faiss_utils import load_faiss_index, embed_text
 from utils.user_input_detector import detect_emotion_and_context
 from utils.text1_response_generator import generate_response_with_faiss, generate_gemini_response_from_results
 from utils.text2_response_generator import text2faiss, recommend_restaurant_from_subset
-from utils.filter_fixed_inputs import filter_fixed_address_purpose, filter_fixed_datetime_members
+from utils.filter_fixed_inputs import filter_fixed_address_purpose, filter_fixed_datetime_members, filter_fixed_address_purpose_text1
 
 
 # 세션 상태에서 페이지 상태를 관리
@@ -765,19 +765,34 @@ elif st.session_state.page == 'next_page':
 
                 # (Step 3) 1번 질문일 경우 (검색형 질문)
                 else: 
+                    # (3-1) 신한카드 데이터에 고정질문 (방문지역, 방문 목적 기준으로)
+                    print(f'고정질문: {st.session_state.selected_regions, st.session_state.visit_purpose}')
+
+                    if st.session_state.selected_regions == []:
+                        filtered_df = df.copy()
+                    else:
+                        filtered_df = df[df['address_map'].apply(lambda x: isinstance(x, str) and any(addr in x for addr in st.session_state.selected_regions))]
+                        print(f'지역 필터링 완료, 길이: {len(filtered_df)}')
+
+                    if st.session_state.visit_purpose != '선택 안함':
+                        filtered_df = filtered_df[filtered_df['목적'] == st.session_state.visit_purpose]
+
+
                     # (3-1) sql 쿼리 반환 [두번째 gemini 호출]
                     sql_query = convert_question_to_sql(which_csv)
                     print(f"Generated SQL Query: {sql_query}")
                     # (2-2) sql 쿼리 적용 및 결과 반환
-                    sql_results = execute_sql_query_on_df(sql_query, df)
+                    sql_results = execute_sql_query_on_df(sql_query, filtered_df)
                     # (2-3) 반환된 데이터가 없을 시 faiss 적용, 있다면 그대로 gimini 호출 [세번째 gemini 호출]
                     if sql_results.empty:
                         print("SQL query failed or returned no results. Falling back to FAISS.")
 
+                        filtered_fix= filter_fixed_address_purpose_text1(st.session_state.selected_regions, st.session_state.visit_purpose, df)
+                        
                         embeddings_path = config['faiss']['embeddings_path'] 
 
                         embeddings = np.load(embeddings_path)
-                        response = generate_response_with_faiss(prompt, df, embeddings, model, embed_text)
+                        response = generate_response_with_faiss(prompt, filtered_fix, embeddings, model, embed_text)
                         print(response)
                     else:
                         response = generate_gemini_response_from_results(sql_results, prompt)

@@ -95,3 +95,48 @@ if __name__ == "__main__":
 
     if filtered_recommendations is not None:
         print(f"Recommended restaurants saved to {output_filename}")
+
+
+def filter_fixed_address_purpose_text1(input_address, purpose_choice, data):
+    """
+    text1에서 방문 지역과 방문 목적에 따라 레스토랑을 필터링하고 반환하는 함수.
+    
+    [Parameters]:
+    input_address (str)- 사용자가 입력한 지역 정보 리스트 (예: ['제주시 애월읍','서귀포시 남원읍']).
+    purpose_choice (str)- 사용자가 선택한 목적 (예: '선택 안함', '식사', '카페/디저트').
+    df- 필터링 적용할 데이터프레임
+
+    [Returns]:
+    pd.DataFrame: 필터링된 레스토랑 정보가 포함된 DataFrame.
+    """
+    print(f'고정질문: {input_address}, {purpose_choice}')
+    print(f'입력 데이터 : {data.head(1)}')
+
+    # Step 1: 지역 기반 필터링 
+    # 지역을 선택하지 않았을 경우 필터링 하지 않은 데이터를 변수에 넣고, 선택했을 경우 선택한 모든 지역을 필터링하여 변수에 넣음
+    if input_address == []:
+        print('지역 선택 안함')
+        filtered_df = data
+    else:
+        filtered_df = data[data['address_map'].apply(lambda x: isinstance(x, str) and any(addr in x for addr in input_address))]
+        print(f'지역 필터링 완료, 길이:{len(filtered_df)}')
+        print(f'지역 필터링 결과: {filtered_df["address_map"].unique()}')
+    
+    if purpose_choice != '선택 안함':
+        filtered_df = filtered_df[filtered_df['목적'] == purpose_choice]
+
+    # 정규 표현식을 사용하여 쉼표로 구분된 카테고리 추출 (쉼표가 포함된 경우도 포함)
+    category_list = re.findall(r"'([^']*)'", filtered_df)
+    category_list = [cat.strip() for cat in category_list]
+    
+    # 카테고리가 매칭되는지 확인하는 함수 (쉼표 포함된 문자열을 전체로 비교)
+    def category_match(restaurant_categories, category_list):
+        restaurant_category = restaurant_categories.lower().strip()
+        return any(restaurant_category == cat.lower().strip() for cat in category_list)
+    
+    # 카테고리를 기준으로 필터링
+    final_filtered_data = filtered_df[filtered_df['목적'].apply(lambda x: category_match(x, category_list))]
+    print(f'방문목적 필터링 완료, 길이: {len(final_filtered_data)}')  
+    print(f'방문목적 필터링 결과: {final_filtered_data["목적"].unique()}')
+    print(f'지역 필터링 결과: {final_filtered_data["address_map"].unique()}')
+    return final_filtered_data

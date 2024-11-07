@@ -8,12 +8,12 @@ device: "cuda"  # or "cpu", depending on your setup
 data:
   # Paths to your data files
   categorized_data: "data/categorized_restaurants.csv"
-  restaurant_data_csv: "data/shinhancard_data_with_text.csv"
+  restaurant_data_csv: "data/modified_shinhancard_data_with_text.csv"
   restaurant_info_data_csv: "data/crawled_kakao_restaurant_with_address_map_text2.csv"
 
 faiss:
-  embeddings_path: "modules/updated_text1_restaurant_embeddings.npy"
-  faiss_index: "modules/updated_text1_restaurant_faiss.index"
+  embeddings_path: "modules/modified_updated_text1_restaurant_embeddings.npy"
+  faiss_index: "modules/modified_updated_text1_restaurant_faiss.index"
   text2_faiss_index: "modules/updated_text2_kakao_restaurant_faiss.index"
   text2_embeddings: "modules/updated_text2_kakao_restaurant_embeddings.npy"
 
