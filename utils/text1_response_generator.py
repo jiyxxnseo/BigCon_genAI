@@ -72,7 +72,7 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
 # Function to generate response based on SQL query results
 def generate_gemini_response_from_results(sql_results, question):
     """
-    SQL 쿼리를 통해 반환된 데이터에서 4개를 선택 후 gemini를 호출해 추천을 진행하는 함수. 에러가 나거나 결과가 없을 시 기본메세지 반환.
+    SQL 쿼리를 통해 반환된 데이터에서 3개를 선택 후 gemini를 호출해 추천을 진행하는 함수. 에러가 나거나 결과가 없을 시 기본메세지 반환.
 
     [Parameters]:
     - sql_results (df) : SQL 쿼리를 통해 반환된 데이터
