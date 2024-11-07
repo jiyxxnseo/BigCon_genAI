@@ -124,19 +124,6 @@ def filter_fixed_address_purpose_text1(input_address, purpose_choice, data):
     
     if purpose_choice != '선택 안함':
         filtered_df = filtered_df[filtered_df['목적'] == purpose_choice]
-
-    # 정규 표현식을 사용하여 쉼표로 구분된 카테고리 추출 (쉼표가 포함된 경우도 포함)
-    category_list = re.findall(r"'([^']*)'", filtered_df)
-    category_list = [cat.strip() for cat in category_list]
-    
-    # 카테고리가 매칭되는지 확인하는 함수 (쉼표 포함된 문자열을 전체로 비교)
-    def category_match(restaurant_categories, category_list):
-        restaurant_category = restaurant_categories.lower().strip()
-        return any(restaurant_category == cat.lower().strip() for cat in category_list)
-    
-    # 카테고리를 기준으로 필터링
-    final_filtered_data = filtered_df[filtered_df['목적'].apply(lambda x: category_match(x, category_list))]
-    print(f'방문목적 필터링 완료, 길이: {len(final_filtered_data)}')  
-    print(f'방문목적 필터링 결과: {final_filtered_data["목적"].unique()}')
-    print(f'지역 필터링 결과: {final_filtered_data["address_map"].unique()}')
-    return final_filtered_data
+        print(f'목적 필터링 완료, 길이:{len(filtered_df)}')
+        print(f'목적 필터링 결과: {filtered_df["목적"].unique()}')
+    return filtered_df

@@ -1,3 +1,5 @@
+import faiss
+import torch
 from utils.faiss_utils import load_faiss_index
 from utils.config import model, config
 
@@ -10,13 +12,24 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
     print(index_path)
 
     # Load FAISS index
-    index = load_faiss_index(index_path)
+    #index = load_faiss_index(index_path)
+
+    # 필터링된 데이터의 인덱스 추출
+    filtered_indices = df.index.tolist()
+
+    # 추출된 인덱스를 통해 임베딩 데이터에서 필터링된 데이터만 추출
+    filtered_embeddings = embeddings[filtered_indices]
 
     # Query embedding
     query_embedding = embed_text(question).reshape(1, -1)
 
+    # FAISS 인덱스 빌드
+    dimension = filtered_embeddings.shape[1]
+    faiss_index = faiss.IndexFlatL2(dimension)
+    faiss_index.add(filtered_embeddings)
+
     # 가장 유사한 텍스트 검색 (3배수)
-    distances, indices = index.search(query_embedding, k*3)
+    distances, indices = faiss_index.search(query_embedding, k*3)
 
     # FAISS로 검색된 상위 k개의 데이터프레임 추출
     filtered_df = df.iloc[indices[0, :]].copy().reset_index(drop=True)

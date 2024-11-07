@@ -3,6 +3,7 @@ import folium
 from streamlit_folium import st_folium
 import requests
 import numpy as np
+import pandas as pd
 
 
 # utils 가져오기 
@@ -783,6 +784,7 @@ elif st.session_state.page == 'next_page':
                     print(f"Generated SQL Query: {sql_query}")
                     # (2-2) sql 쿼리 적용 및 결과 반환
                     sql_results = execute_sql_query_on_df(sql_query, filtered_df)
+
                     # (2-3) 반환된 데이터가 없을 시 faiss 적용, 있다면 그대로 gimini 호출 [세번째 gemini 호출]
                     if sql_results.empty:
                         print("SQL query failed or returned no results. Falling back to FAISS.")
