@@ -14,7 +14,7 @@ def text2faiss(user_input, df):
     df - 고정질문을 통해 필터링된 데이터프레임
 
     [Returns]:
-    top_300_restaurants - 사용자 입력과 유사한 상위 300개의 레스토랑 반환
+    top_15_restaurants - 사용자 입력과 유사한 상위 15개의 레스토랑 반환
     """
     # FAISS 임베딩 불러오기
     embeddings_path = config['faiss']['text2_embeddings']
