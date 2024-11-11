@@ -15,7 +15,7 @@
 2. [데이터셋 소개](#데이터셋-소개)
 3. [서비스 개요](#서비스-개요)
 
-## 소개
+## 1. 소개
  
 > 분석 주제명: 감정과 상황을 반영한 개인화된 제주 맛집 추천 서비스
 <br><br>
@@ -34,7 +34,7 @@
 
 <br><br>
 
-## 데이터셋 소개
+## 2. 데이터셋 소개
 서비스 동작에 필요한 최종 데이터셋 소개
 
 1. 신한카드 제주 가맹점 이용 데이터
@@ -52,7 +52,7 @@
 <img src="./asset/kakao_data2.png"width="800">
 </p>
 
-## 데이터 전처리
+## 3. 데이터 전처리
 신한카드 데이터셋과 카카오맵 크롤링 데이터셋에 대한 데이터 수집 및 전처리 코드는 [`./preprocessing`](./preprocessing) 디렉토리에 저장되어 있습니다.
 
 >신한카드 데이터 전처리
@@ -74,7 +74,7 @@
 
 
 
-## 서비스 개요
+## 4. 서비스 개요
 ### 메인 페이지:
 <p align="center">
 <img src="./asset/str_page1.png"width="800">
@@ -102,9 +102,27 @@
 <img src="./asset/str_chat.png" width="800">
 </p>
 
+## 5. 분석 방향성
+
+</p>
+<p align="center">
+<img src="./asset/flow_diagram.png" width="800">
+<em>윗부분에서 검색형 질문에 대한 응답 생성 파이프라인을, 아래 부분에서 추천형 질문에 대한 응답 생성 파이프라인을 보여줍니다.</em>
+</p>
+
+**1.검색형 질문**
+- 목적: 신한카드 데이터(JEJU_MCT_DATA_v2.CSV)를 바탕으로 정보 검색형 질문에 답합니다.
+- 데이터: 제공된 신한카드 데이터
+- Text 1 생성: 데이터 칼럼을 요약하여 모든 값을 정확하게 반영한 Text 1을 생성하고 이를 바탕으로 Gemini 1.5 Flash가 추천을 진행합니다.
+
+**2.추천형 질문**
+- 목적: 사용자의 감정과 상황을 바탕으로 맞춤형 제주도 맛집을 추천합니다.
+- 데이터: 신한카드 데이터에서 등록된 식당 이름을 바탕으로 카카오맵 크롤링을 통해 리뷰와 기본 정보를 수집합니다.
+- 키워드 추출: 리뷰 데이터를 기반으로 15가지 주요 카테고리별 키워드를 GPT 4.0 mini API로 추출합니다
 
 
-## 레포지토리 구조 (Repository Structure)
+
+## 6. 레포지토리 구조 (Repository Structure)
 
 ```
 # 서비스 구현에 필요한 데이터들을 보관하는 디렉토리
@@ -142,8 +160,54 @@
 │   ├── text1_response_generator.py
 │   ├── text2_response_generator.py
 │   └── user_input_detector.py
-
 │ 
 ├──
 
+```
+
+
+## 8. 실행 방법 (How to Run)
+
+### Miniconda 필요할 경우 설치
+먼저 새로운 conda 환경을 생성합니다.
+```bash
+$ mkdir -p ~/miniconda3    # 사용자 홈 디렉토리에 'miniconda3' 디렉토리를 생성 (디렉토리가 이미 존재해도 오류 없이 진행)
+$ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh    # Miniconda 설치 스크립트를 다운로드
+$ bash Miniconda3-latest-Linux-x86_64.sh    # 설치 스크립트를 실행하여 Miniconda를 설치
+$ rm ~/miniconda3/miniconda.sh   # 설치 후 불필요한 설치 스크립트 파일을 삭제
+```
+설치가 완료된 후, 새로 설치한 Miniconda를 초기화합니다.
+
+```bash
+$ ~/miniconda3/bin/conda init bash    # bash 셸에 conda 초기화 설정을 추가
+$ ~/miniconda3/bin/conda init zsh    # zsh 셸에 conda 초기화 설정을 추가
+$ conda --version    # 설치된 conda의 버전을 확인하여 설치가 성공적으로 완료되었는지 확인
+
+``` 
+새로운 터미널에서 conda 환경 생성 밎 실행
+
+```bash
+$ conda create -n bigcon python=3.9   #새로운 conda 환경을 생성
+$ conda activate bigcon   #'bigcon' 환경 활성화
+``` 
+
+### 깃허브로 환경 설정
+```bash
+$ git clone https://github.com/min214kim/BigCon_genAI.git # 프로젝트 레포지토리를 클론
+$ cd BigCon_genAI   # 프로젝트 디렉토리로 이동
+$ pip install -r requirements.txt    # 프로젝트에 필요한 패키지를 설치
+``` 
+
+### configuration setting 수정
+[`./config.yaml`](./config.yaml) 에서 Gemini 실행을 위한 api_key 설정.
+
+</p>
+<p align="center">
+<img src="./asset/api.png" width="500">
+</p>
+
+
+### 챗봇 실행
+```bash
+$ streamlit run main.py
 ```
