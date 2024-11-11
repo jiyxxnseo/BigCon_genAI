@@ -118,6 +118,32 @@
 │   ├── modified_updated_text1_restaurant_faiss.index # 최종 신한카드 데이터 FAISS 인덱스
 │   ├── updated_text2_kakao_restaurant_embeddings.npy # 최종 카카오맵 데이터 임베딩 파일
 │   ├── updated_text2_kakao_restaurant_faiss.index # 최종 카카오맵 데이터 FAISS 인덱스
-│   ...
-│   └──
+│   └── ...
+│ 
+├── preprocessing
+│   ├── categorized_restaurants.csv_파일생성.py
+│   ├── generate_shorter_text2.py
+│   ├── text1_addressmap_purpose.py
+│   ├── text1_faiss.py
+│   ├── text2 _식당 정보+리뷰데이터 요약 (gpt 4.0 mini).py
+│   ├── text2_FAISS임베딩.py
+│   ├── 리뷰데이터_크롤링.py
+│   ├── 신한카드데이터전처리_text1생성.py
+│   ├── 카카오맵식당_상세보기_링크.py
+│   ├── 카카오맵추가크롤링_식당이름,주소1,2.py
+│   └── 크롤링데이터전처리_기타카테고리제거.py
+│   └── 크롤링데이터전처리_제주도지도기준으로.py
+│ 
+├── utils
+│   ├── config.py # Contains configuration settings for the project, such as file paths or API keys
+│   ├── faiss_utils.py
+│   ├── filter_fixed_inputs.py
+│   ├── sql_utils.py
+│   ├── text1_response_generator.py
+│   ├── text2_response_generator.py
+│   └── user_input_detector.py
+
+│ 
+├──
+
 ```
