@@ -6,9 +6,8 @@ import requests
 import numpy as np
 import pandas as pd
 
-
 # utils 가져오기 
-from utils.config import model, df, text2_df, config 
+from utils.config import model, df, text2_df, config, mapbox_key
 from utils.sql_utils import convert_question_to_sql, execute_sql_query_on_df
 from utils.faiss_utils import load_faiss_index, embed_text
 from utils.user_input_detector import detect_emotion_and_context
@@ -480,7 +479,8 @@ if st.session_state.page == 'main':
     # 제주도 중심 좌표
     jeju_center = [33.38, 126.6] # 기존 33.4996, 126.5312
 
-    mapbox_token = st.secrets["MAPBOX_API_KEY"]
+    # mapbox_token = st.secrets["MAPBOX_API_KEY"]
+    mapbox_token = mapbox_key
 
     # 커스텀 Mapbox 스타일 URL 적용
     mapbox_style = 'mapbox://styles/gina261/cm2f34dvz000g01pygoj0g41c'
@@ -615,7 +615,7 @@ if st.session_state.page == 'main':
 
 elif st.session_state.page == 'next_page':
     
-    GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+    # GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
     
     # 프로필 이미지 설정
     assistant_avatar = "https://github.com/gina261/bigcontest_genAI/blob/main/images/chatbot_assistant.png?raw=true"

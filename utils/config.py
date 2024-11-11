@@ -27,6 +27,8 @@ model = genai.GenerativeModel(model_name)
 tokenizer = AutoTokenizer.from_pretrained(embedding_model_name)
 embedding_model = AutoModel.from_pretrained(embedding_model_name).to(device)
 
+# mapbox token
+mapbox_key = config['mapbox']['mapbox_token']
 
 # Load DataFrame files (example)
 df = pd.read_csv(config['data']['restaurant_data_csv'])
