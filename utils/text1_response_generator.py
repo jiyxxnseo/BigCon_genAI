@@ -4,8 +4,6 @@ import torch
 from utils.faiss_utils import load_faiss_index
 from utils.config import model, config
 
-# Multi-turn 대화 컨텍스트 관리
-multi_turn_context = []
 
 # 취소선 및 볼드 문법 제거 함수
 def clean_text(text):
@@ -51,9 +49,8 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
     for idx, row in filtered_df.iterrows():
         reference_info += f"{row['text']}\n"
 
-    # 대화 히스토리를 포함한 프롬프트 구성
-    conversation_history = "\n".join(multi_turn_context)
-    prompt = f"{conversation_history}\n질문: {question}\n참고할 정보:\n{reference_info}\n응답은 친절하게 추천하는 챗봇처럼:"
+    # 프롬프트 구성
+    prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 친절하게 추천하는 챗봇처럼:"
 
     print(model.count_tokens(prompt))
     try:
@@ -67,10 +64,6 @@ def generate_response_with_faiss(question, df, embeddings, model, embed_text, k=
         else:
             generated_text = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
             print("No valid response generated.")
-
-        # 대화 컨텍스트에 질문과 응답 추가
-        multi_turn_context.append(f"질문: {question}")
-        multi_turn_context.append(f"응답: {generated_text}")
         
     except Exception as e:
         print(f"Error occurred: {e}")
@@ -89,8 +82,7 @@ def generate_gemini_response_from_results(sql_results, question):
     for idx, row in best_match.iterrows():
         reference_info += f"{row['text']}\n"
 
-    conversation_history = "\n".join(multi_turn_context)
-    prompt = f"{conversation_history}\n질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하고 친근하게 식당 추천해주는 챗봇처럼:"
+    prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하고 친근하게 식당 추천해주는 챗봇처럼:"
     print("input_tokens: ", model.count_tokens(prompt))
     print("sql_참고자료 tokens: ", model.count_tokens(reference_info))
 
@@ -107,9 +99,6 @@ def generate_gemini_response_from_results(sql_results, question):
         else:
             response_text = "죄송해요. 추천에 필요한 정보가 조금 부족한 것 같아요🥲 구체적으로 다시 질문해주시면 그에 딱 맞는 멋진 곳을 추천해 드릴게요!🥰"
         
-        # 대화 컨텍스트에 질문과 응답 추가
-        multi_turn_context.append(f"질문: {question}")
-        multi_turn_context.append(f"응답: {response_text}")
     
     except Exception as e:
         print(f"Error occurred: {e}")
