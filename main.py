@@ -5,6 +5,8 @@ from streamlit_folium import st_folium
 import requests
 import numpy as np
 import pandas as pd
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # utils 가져오기 
 from utils.config import model, df, text2_df, config, mapbox_key
