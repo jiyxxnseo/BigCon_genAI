@@ -65,7 +65,7 @@
 > 카카오맵 크롤링 데이터 전처리
 > 1. Review_date`에 '정보 없음'과 2020년 이전 데이터는 제거
 > 2. 카카오맵의 상세보기 링크 추출을 첫번째 링크 기준으로 가져왔기 때문에, 크롤링하려는 식당과 다른 식당들 제거.
->  >- 링크가 없을 경우도 제거
+>  - 링크가 없을 경우도 제거
 > 3. `Address_map`에 메인페이지 지도 상에 표시된 13개 구역에 포함되지 않는 식당은 제거.
 > 4. `Category`에서 ‘식사' 나 ‘카페/디저트'에 해당되지 않으면 (‘기타’ 카테고리) 제거
 > 5. 식당 기본 정보 요약과 리뷰 데이터 기반 15가지 카테고리 키워드를 담은 `Text 2` 칼럼 생성
@@ -107,7 +107,9 @@
 </p>
 <p align="center">
 <img src="./asset/flow_diagram.png" width="800">
+<br>
 <em>윗부분에서 검색형 질문에 대한 응답 생성 파이프라인을, 아래 부분에서 추천형 질문에 대한 응답 생성 파이프라인을 보여줍니다.</em>
+</br>
 </p>
 
 **1.검색형 질문**
@@ -139,29 +141,29 @@
 │   └── ...
 │ 
 ├── preprocessing
-│   ├── categorized_restaurants.csv_파일생성.py
-│   ├── generate_shorter_text2.py
-│   ├── text1_addressmap_purpose.py
-│   ├── text1_faiss.py
-│   ├── text2 _식당 정보+리뷰데이터 요약 (gpt 4.0 mini).py
-│   ├── text2_FAISS임베딩.py
-│   ├── 리뷰데이터_크롤링.py
-│   ├── 신한카드데이터전처리_text1생성.py
-│   ├── 카카오맵식당_상세보기_링크.py
-│   ├── 카카오맵추가크롤링_식당이름,주소1,2.py
-│   └── 크롤링데이터전처리_기타카테고리제거.py
-│   └── 크롤링데이터전처리_제주도지도기준으로.py
+│   ├── text1_addressmap_purpose.py # 신한카드 데이터에서 방문목적 칼럼과 스트림릿 기준으로 "address_map" 칼럼 생성
+│   ├── text1_faiss.py # FAISS 인덱스 빌드
+│   ├── text1_shinhancard_preprocessing.py #중 복 제거, 컬럼명 한글로 변경, 각 행에 대한 텍스트 설명하는 text1 칼럼 생성
+│   ├── text2_gpt4.0mini.py # 카카오맵 크롤링 데이터에서 리뷰 데이터로 식당 정보 요약 함수
+│   ├── text2_added_kakao_crawling_name_address1,2.py # 카카오맵상의 주소 크롤링
+│   ├── text2_categorized_restaurants.csv_generate.py # 카카오맵 크롤링 데이터에서 "식사", "카페/디저트", "기타"로 분류
+│   ├── text2_faiss.py # text2에서 FAISS 인덱스 빌드 
+│   ├── text2_jejumap_address_preprocessing.py # 카카오맵 크롤링 데이터에서 주소 고정질문 필터링을 위한 전처리
+│   ├── text2_kakao_crawling_detailedlinks.py # 카카오맵에서 식당 이름으로 검색 후 상세보기 링크 수집
+│   ├── text2_kakao_crawling_infosummary.py # 카카오맵 상세보기 링크에서 정보(식당 시설 정보, 메뉴 정보, 등등)와 리뷰 데이터 수집
+│   ├── text2_remove_gita_restaurants.py # 방문 목적에서 '기타'에 해당하는 카테고리의 식당들을 제거하고 '기타'에 해당하는 카테고리 리스트와 해당 식당들을 출력
+│   └── text2_shorter_summary.py # 카카오맵 크롤링 데이터에서 text2 식당 정보 요약 함수
 │ 
 ├── utils
 │   ├── config.py # Contains configuration settings for the project, such as file paths or API keys
-│   ├── faiss_utils.py
-│   ├── filter_fixed_inputs.py
-│   ├── sql_utils.py
-│   ├── text1_response_generator.py
-│   ├── text2_response_generator.py
-│   └── user_input_detector.py
+│   ├── faiss_utils.py # text1의 FAISS index랑 Embed text불러오는 함수
+│   ├── filter_fixed_inputs.py # 신한카드랑 카카오맵 데이터에서 선택된 방문 목적과 방문 지역에 따라 필터링, 카카오맵에서 방문 요일, 시간, 인원수에 따라 faiss검색 시 다른 키워드가 추가하는 함수
+│   ├── sql_utils.py # 신한카드 데이터에서 sql 쿼리 생성과 실행하는 함수
+│   ├── text1_response_generator.py # 실행된 sql 쿼리 결과로 답변을 생성하는 함수, sql쿼리가 실행 안됐을 경우 faiss로 유사한 식당 추천하는 함수
+│   ├── text2_response_generator.py # 사용자 입력과 유사한 상위 15개의 레스토랑 반환하는 함수
+│   └── user_input_detector.py # 사용자가 입력한 질문이 검색형 질문인지, 추천형 질문인지 감지하는 함수
 │ 
-├──
+├── ...
 
 ```
 
