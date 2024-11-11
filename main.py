@@ -835,7 +835,7 @@ elif st.session_state.page == 'next_page':
     for message in st.session_state.messages:
         avatar = user_avatar if message["role"] == "user" else assistant_avatar
         with st.chat_message(message["role"], avatar=avatar):
-            st.write(message["content"])
+            st.write(message["content"],unsafe_allow_html=True)
 
  
     if prompt := st.chat_input():
@@ -925,7 +925,7 @@ elif st.session_state.page == 'next_page':
                 else:
                     full_response = response.text # response 객체에서 텍스트 부분 추출
                 
-                placeholder.markdown(full_response)
+                placeholder.markdown(full_response,unsafe_allow_html=True)
         message = {"role": "assistant", "content": full_response}
         st.session_state.messages.append(message)
         
