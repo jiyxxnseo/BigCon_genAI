@@ -163,7 +163,7 @@
 │   ├── text2_response_generator.py # 사용자 입력과 유사한 상위 15개의 레스토랑 반환하는 함수
 │   └── user_input_detector.py # 사용자가 입력한 질문이 검색형 질문인지, 추천형 질문인지 감지하는 함수
 │ 
-├── ...
+├── geojson & 
 
 ```
 
@@ -171,7 +171,7 @@
 ## 8. 실행 방법 (How to Run)
 
 ### Miniconda 필요할 경우 설치
-먼저 새로운 conda 환경을 생성합니다.
+먼저 새로운 conda 환경을 생성합니다 (`Linux 환경`). macOS나 Windows PowerShell을 활용하는 경우 [miniconda 문서 사이트](https://docs.anaconda.com/miniconda/#quick-command-line-install)에 나와있는 커맨드 라인 참고하여 실행.
 ```bash
 $ mkdir -p ~/miniconda3    # 사용자 홈 디렉토리에 'miniconda3' 디렉토리를 생성 (디렉토리가 이미 존재해도 오류 없이 진행)
 $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh    # Miniconda 설치 스크립트를 다운로드
@@ -193,11 +193,19 @@ $ conda create -n bigcon python=3.9   #새로운 conda 환경을 생성
 $ conda activate bigcon   #'bigcon' 환경 활성화
 ``` 
 
-### 깃허브로 환경 설정
+### 깃허브로 환경 설정하는 경우
 ```bash
 $ git clone https://github.com/min214kim/BigCon_genAI.git # 프로젝트 레포지토리를 클론
 $ cd BigCon_genAI   # 프로젝트 디렉토리로 이동
 $ pip install -r requirements.txt    # 프로젝트에 필요한 패키지를 설치
+``` 
+
+### 코드 zip으로 환경 설정하는 경우
+```bash
+$ pip install zip #zip 라이브러리 설치, 안될 경우 'sudo apt install unzip'
+$ unzip prettyDA_BigCon_genAI.zip #코드 zip 파일 압축 풀기
+$ cd prettyDA_BigCon_genAI # 프로젝트 디렉토리로 이동
+$ pip install -r requirements.txt #프로젝트에 필요한 패키지를 설치
 ``` 
 
 ### configuration setting 수정
