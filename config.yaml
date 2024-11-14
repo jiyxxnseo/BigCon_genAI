@@ -2,8 +2,8 @@
 
 google_api:
   api_key: "-"  # Replace with your actual Google API key
-
-device: "cuda"  # or "cpu", depending on your setup
+  
+device: "cuda" # or "cpu", depending on your setup
 
 data:
   # Paths to your data files
@@ -19,7 +19,7 @@ faiss:
 
 model:
   name: "gemini-1.5-flash"
-  embedding_model_name: "jhgan/ko-sroberta-multitask"  # Example embedding model
+  embedding_model_name: "jhgan/ko-sroberta-multitask" # Example embedding model
 
 mapbox:
   mapbox_token: "pk.eyJ1IjoiZ2luYTI2MSIsImEiOiJjbTJmMnoydmswNG5qMmlwem5sZm42ZzZuIn0.TwUXGBwG-eBZUKeqDd0oEA"

@@ -1,3 +1,4 @@
+import re
 import torch
 import faiss
 import numpy as np
@@ -6,6 +7,18 @@ from utils.config import model, tokenizer, embedding_model, device, config
 
 # Multi-turn 대화 컨텍스트 관리
 multi_turn_context = []
+
+# 취소선 및 볼드 문법 제거 함수
+def clean_text(text):
+    # ~~취소선~~ 문법 제거
+    text = re.sub(r"~~(.*?)~~", r"\1", text)
+    # ~취소선~ 문법 제거
+    text = re.sub(r"~(.*?)~", r"\1", text)
+    # **"텍스트"**를 <b>"텍스트"</b>로 변환
+    text = re.sub(r'\*\*"(.*?)"\*\*', r'<b>"\1"</b>', text)
+    # **텍스트**를 <b>텍스트</b>로 변환
+    text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', text)
+    return text
 
 def text2faiss(user_input, df):
     """
@@ -83,6 +96,9 @@ def recommend_restaurant_from_subset(user_input, top_15_restaurants):
         # 응답이 없을 경우 기본 메시지 설정
         else:
             response = "추천에 필요한 정보가 부족해요. 다시 구체적으로 질문해주세요!"
+        
+        # HTML로 변환하여 텍스트 처리
+        response = clean_text(response)
 
         # 대화 컨텍스트에 질문과 응답 추가
         multi_turn_context.append(f"질문: {user_input}")
