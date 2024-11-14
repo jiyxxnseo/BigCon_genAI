@@ -91,7 +91,7 @@ def generate_gemini_response_from_results(sql_results, question):
     for idx, row in best_match.iterrows():
         reference_info += f"{row['text']}\n"
 
-    prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하고 친근하게 식당 추천해주는 챗봇처럼:"
+    prompt = f"질문: {question}\n참고할 정보:\n{reference_info}\n응답은 최대한 친절하고 친근하게 식당 추천해주는 챗봇처럼 해줘. 참고할 정보에 나와있는 식당은 순서대로 모두 추천해줘:"
     print("input_tokens: ", model.count_tokens(prompt))
     print("sql_참고자료 tokens: ", model.count_tokens(reference_info))
 
