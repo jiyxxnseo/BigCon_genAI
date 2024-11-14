@@ -232,3 +232,12 @@ $ pip install -r requirements.txt #프로젝트에 필요한 패키지를 설치
 ```bash
 $ streamlit run main.py
 ```
+
+## 8. 참고
+### 배포 사이트
+[https://bigcontest-prettyda.streamlit.app/](https://bigcontest-prettyda.streamlit.app/)
+
+
+## 9. Reference
+- [Github greenjhp/shcard_bigcontest2024_llm](https://github.com/greenjhp/shcard_bigcontest2024_llm)
+- [Github facebookresearch/faiss](https://github.com/facebookresearch/faiss)
