@@ -11,9 +11,13 @@
 
 <br><br>
 ## Table of Contents
-1. [선택 분석 주제 소개](#소개)
-2. [데이터셋 소개](#데이터셋-소개)
-3. [서비스 개요](#서비스-개요)
+1. [선택 분석 주제 소개](#1-소개)
+2. [데이터셋 소개](#2-데이터셋-소개)
+3. [데이터 전처리](#3-데이터-전처리)
+4. [서비스 개요](#4-서비스-개요)
+5. [분석 방향성](#5-분석-방향성)
+6. [레포지토리 구조(Repository Structure)](#6-레포지토리-구조-repository-structure)
+7. [실행 방법](#7-실행-방법-how-to-run)
 
 ## 1. 소개
  
@@ -163,12 +167,19 @@
 │   ├── text2_response_generator.py # 사용자 입력과 유사한 상위 15개의 레스토랑 반환하는 함수
 │   └── user_input_detector.py # 사용자가 입력한 질문이 검색형 질문인지, 추천형 질문인지 감지하는 함수
 │ 
-├── geojson & 
-
+├── geojson & images # streamlit 소스 디렉토리
+│ 
+├── config.yaml # 사용자 configuration setting 파일
+│ 
+├── main.py # 애플리케이션 시작 지점
+│ 
+├──requirements.txt # 필요한 패키지 설치
+│ 
+└── ...
 ```
 
 
-## 8. 실행 방법 (How to Run)
+## 7. 실행 방법 (How to Run)
 
 ### Miniconda 필요할 경우 설치
 먼저 새로운 conda 환경을 생성합니다 (`Linux 환경`). macOS나 Windows PowerShell을 활용하는 경우 [miniconda 문서 사이트](https://docs.anaconda.com/miniconda/#quick-command-line-install)에 나와있는 커맨드 라인 참고하여 실행.
