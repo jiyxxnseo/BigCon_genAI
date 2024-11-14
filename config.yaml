@@ -1,8 +1,8 @@
 # Configuration settings for the application
 
 google_api:
-  api_key: "AIzaSyAh7WkRGw7ZeVNkP312KCfR3tT6ApjG6XM" # Replace with your actual Google API key
-
+  api_key: "-"  # Replace with your actual Google API key
+  
 device: "cuda" # or "cpu", depending on your setup
 
 data:
